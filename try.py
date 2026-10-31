@@ -14,18 +14,32 @@ department = st.selectbox(
     ["DS", "CY", "IS", "MI"]
 )
 
+if "choice1" not in st.session_state:
+    st.session_state.choice1 = "Select"
+
+if "choice2" not in st.session_state:
+    st.session_state.choice2 = "Select"
 
 
 course = st.selectbox(
     "Choose Course",
-    
-   [ "",*file_dep["Course Name (EN)"].dropna().unique()]
-)
+        
+    ["Select",*file_dep["Course Name (EN)"].dropna().unique()]
+    ,
+    key="choice1",
+    disabled=st.session_state.choice2 != "Select"
+    )
+  
 
-code = st.selectbox(
-    "or Choose Course code",
-   ["", *file_dep["Code"].dropna().unique()]
-)
+   
+code= st.selectbox(
+        "or Choose Course code",
+    ["Select", *file_dep["Code"].dropna().unique()],
+    key="choice2",
+    disabled=st.session_state.choice1 != "Select"
+    )
+
+st.write("course info")
 
 course_info=info[(info["Code"]==code) | (info["Course Name (EN)"]==course )]
 st.dataframe((course_info[["Code","Course Name (EN)","اسم المقرر (AR)","Credits","Category"]]),hide_index=True, use_container_width=True)
@@ -36,6 +50,6 @@ subject_open=file_req[(file_req["Prerequisite"]==code) | (file_req["Prerequisite
 merged=pd.merge(file_dep, subject_open, left_on="Code", right_on="Course").drop(["Prerequisite Name (EN)","Prerequisite","Course Name (EN)_y","Course"],axis=1)
 data=merged[merged["Department"]==department]
 
-st.write("course ", course,"open on ",department,"department")
+st.write("course ","open in ",department,"department")
 st.write( data.shape[0])
 st.dataframe(data[["Course Name (EN)_x","Mandatory","Year","Semester","Credits"]], hide_index=True, use_container_width=True)
